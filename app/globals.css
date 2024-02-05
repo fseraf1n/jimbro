@@ -1,33 +1,185 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+ 
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+ 
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+ 
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+ 
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+ 
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+ 
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+ 
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+ 
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+/* // typography */
+
+/* Apply styles to h1 */
+h1 {
+  margin-top: 20rem;
+  font-size: 2.25rem;
+  font-weight: 800;
+  letter-spacing: -0.0125em;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 2.5rem; /* Adjust the font size for larger screens */
+  }
+}
+
+/* Apply styles to h2 */
+h2 {
+  margin-top: 2rem;
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+/* Apply styles to p (paragraphs) */
+p {
+  line-height: 1.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Apply styles to blockquote */
+blockquote {
+  font-style: italic;
+  margin-top: 1.5rem;
+  padding-left: 1.5rem; /* Example padding, adjust as needed */
+}
+
+/* Apply styles to h3 */
+h3 {
+  margin-top: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Apply styles to ul and li */
+ul {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  margin-left: 1.5rem;
+  list-style-type: disc;
+}
+
+ul li {
+  margin-top: 0.5rem;
+}
+
+/* Apply styles to tables */
+table {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* Apply styles to table headers and cells */
+th, td {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: left;
+}
+
+/* Apply styles to div with class "overflow-y-auto" */
+div.overflow-y-auto {
+  overflow-y: auto;
+}
+
+/* Apply styles to all paragraphs with a class starting with "leading-7" */
+p[class^="leading-7"] {
+  margin-top: 1.5rem;
+}
+
+/* Apply styles to all paragraphs that are not the first child */
+p:not(:first-child) {
+  margin-top: 1.5rem;
+}
+
+/* Apply styles to the first child of any type */
+*:first-child {
+  margin-top: 0;
+}
+
+.CollapsibleContent[data-state="open"] {
+  animation: slideDown 150ms ease-out;
+}
+.CollapsibleContent[data-state="closed"] {
+  animation: slideUp 10ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 10%;
+    transform: translateY(-1rem);
+  }
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 10%;
+    transform: translateY(-1rem);
   }
 }
