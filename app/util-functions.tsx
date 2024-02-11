@@ -15,12 +15,16 @@ export async function getCurrentUserData() {
 
 export const fetchUserWorkoutData = async () => {
   const userData = await getCurrentUserData();
-  if ( userData ) {
+  if (userData) {
     const { data: workoutData, error } = await supabase
-      .from("workout")
-      .select("*, exercise(*, set(*))")
+      .from("workout_templates")
+      .select("*, exercise_templates(*)")
       .eq("user_id", userData.id);
     if (error == null) {
+      // processing
+      workoutData.map((workout: any) => {
+        workout.exercise_templates.sort((a: any, b: any) => a.order - b.order);
+      });
       return workoutData;
     } else {
       return null;

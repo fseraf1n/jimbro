@@ -28,7 +28,7 @@ import { Separator } from "@/components/ui/separator";
 import { DotsHorizontalIcon, Pencil1Icon, Pencil2Icon } from "@radix-ui/react-icons";
 import { Workout } from "@/lib/types";
 
-export default function WorkoutDisplay({ data }: { data: Workout[] }) {
+export default function WorkoutDisplay({ data }: { data: any }) {
   // console.dir(workoutData, {depth: null})
   return (
     <div>
@@ -105,10 +105,10 @@ export default function WorkoutDisplay({ data }: { data: Workout[] }) {
                   <span className="text-muted-foreground font-semibold">
                     exercises:{" "}
                   </span>
-                  {item.exercise.map((exercise, index) => (
+                  {item.exercise_templates.map((exercise, index) => (
                     <React.Fragment key={index}>
-                      {exercise.name}
-                      {index < item.exercise.length - 1 && <span>, </span>}
+                      {exercise.exercise_name}
+                      {index < item.exercise_templates.length - 1 && <span>, </span>}
                     </React.Fragment>
                   ))}
                 </span>

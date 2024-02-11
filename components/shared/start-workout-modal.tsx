@@ -55,6 +55,7 @@ export default function StartWorkoutModal({
 }: {
   workoutData: any;
 }) {
+  // console.dir(workoutData, {depth: null})
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutData>(
@@ -64,39 +65,59 @@ export default function StartWorkoutModal({
   const handleButtonClick = () => {
     setIsPopoverOpen((prev) => !prev);
   };
+
+  const handleContinueClick = () => {
+    console.log(workoutData);
+    const currentWorkoutData = JSON.parse(
+      localStorage.getItem("form_state") ?? "{}"
+    );
+    const workoutId = currentWorkoutData.workoutId;
+    console.log(workoutId);
+    setCurrentWorkout(
+      workoutData.find((workout: any) => workout.id == workoutId)
+    );
+    setIsPopoverOpen(false);
+    setIsDrawerOpen(true);
+  };
+
   const form = useForm({
     mode: "onChange",
   });
 
   const onSubmit = async (values: any) => {
-    // const response = await fetch("/api/workout-log/create/", {
-    //   method: "POST",
-    //   body: JSON.stringify({ ...values, user_id: workoutData[0].user_id }),
-    // });
-    // const data = await response.json();
-    // console.log(data);
-    // setCurrentWorkout(data.data[0]);
-    // console.log(
-    //   workoutData.find(
-    //     (workout: any) => workout.id == currentWorkout.workout_id
-    //   )
-    // );
-    // if (response.ok) {
-    //   setIsPopoverOpen(false);
-    //   setIsDrawerOpen(true);
-    // }
-    console.log(values);
     setCurrentWorkout(
       workoutData.find((workout: any) => workout.id == values.workout_id)
     );
     console.log(currentWorkout);
     setIsPopoverOpen(false);
-    setIsDrawerOpen(true);
+
+    setTimeout(() => {
+      setIsDrawerOpen(true);
+    }, 100);
   };
+
+  const checkCurrentSession = () => {
+    if (global?.window !== undefined) {
+      const cachedWorkout = localStorage.getItem("form_state");
+      if (cachedWorkout) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  };
+
+  const cancelCurrentSession = () => {
+    setIsPopoverOpen(false);
+    setTimeout(() => {
+      localStorage.removeItem("form_state");
+    }, 500);
+  };
+
   return (
     <>
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="">
+        <DrawerContent className="h-5/6">
           <DrawerHeader className="flex-1">
             <div className="">
               <DrawerTitle className="text-xl">
@@ -105,8 +126,15 @@ export default function StartWorkoutModal({
             </div>
           </DrawerHeader>
           <div className="w-full h-full">
-            {/* <StartWorkoutForm /> */}
+            <ScrollArea className="h-5/6">
+              <StartWorkoutForm workout={currentWorkout} />
+            </ScrollArea>
           </div>
+          {/* <ScrollArea className="h-80">
+            <pre className="text-xs">
+              {JSON.stringify(currentWorkout, undefined, 2)}
+            </pre>
+          </ScrollArea> */}
         </DrawerContent>
         <div>
           <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen} modal>
@@ -141,54 +169,96 @@ export default function StartWorkoutModal({
               className="w-80 bg-transparent border-none shadow-none"
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
-              <Card
-                className={`rounded-3xl shadow-2xl ${
-                  workoutData.length > 3 ? "h-80" : "h-60"
-                }`}
-              >
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">start a workout</CardTitle>
-                    </CardHeader>
-                    <CardContent className="w-full">
-                      <ScrollArea className="h-40 w-full mx-auto">
-                        <div className="p-3">
-                          <FormField
-                            control={form.control}
-                            name="workout_id"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <RadioGroup
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                    className=""
-                                  >
-                                    {workoutData.map((workout: any) => (
-                                      <FormItem key={workout.id}>
-                                        <FormControl>
-                                          <div className="flex flex-col space-y-5">
-                                            <div className="flex items-center space-x-2">
-                                              <RadioGroupItem
-                                                className="h-6 w-6"
-                                                value={workout.id}
-                                                id={workout.id}
-                                              />
-                                              <Label htmlFor="option-one">
-                                                {workout.name}
-                                              </Label>
-                                            </div>
-                                          </div>
-                                        </FormControl>
-                                      </FormItem>
-                                    ))}
-                                  </RadioGroup>
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          {/* <Accordion type="single" className="w-full" collapsible>
+              <>
+                <Card
+                  className={`rounded-3xl shadow-2xl ${
+                    workoutData.length > 3 ? "h-60" : "h-60"
+                  }`}
+                >
+                  {checkCurrentSession() == true ? (
+                    <>
+                      <CardHeader>
+                        <CardTitle className="text-xl">
+                          workout in progress
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground text-base">
+                          ur workout session has been saved automatically.
+                        </p>
+                      </CardContent>
+                      <CardFooter className="w-full mt-8">
+                        <div className="flex w-full items-center justify-end gap-2">
+                          <div>
+                            <Button
+                              type="button"
+                              className="bg-rose-500"
+                              variant={"destructive"}
+                              onClick={() => cancelCurrentSession()}
+                            >
+                              cancel
+                            </Button>
+                          </div>
+                          <div className="">
+                            <Button
+                              className="bg-slate-700"
+                              type="button"
+                              variant={"default"}
+                              onClick={() => handleContinueClick()}
+                            >
+                              continue
+                            </Button>
+                          </div>
+                        </div>
+                      </CardFooter>
+                    </>
+                  ) : (
+                    <>
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                          <CardHeader>
+                            <CardTitle className="text-lg">
+                              start a workout
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="w-full">
+                            <ScrollArea className="h-24 w-full mx-auto">
+                              <div className="p-3">
+                                <FormField
+                                  control={form.control}
+                                  name="workout_id"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormControl>
+                                        <RadioGroup
+                                          onValueChange={field.onChange}
+                                          defaultValue={field.value}
+                                          className=""
+                                        >
+                                          {workoutData.map((workout: any) => (
+                                            <FormItem key={workout.id}>
+                                              <FormControl>
+                                                <div className="flex flex-col space-y-5">
+                                                  <div className="flex items-center space-x-2">
+                                                    <RadioGroupItem
+                                                      className="h-6 w-6"
+                                                      value={workout.id}
+                                                      id={workout.id}
+                                                    />
+                                                    <Label htmlFor="option-one">
+                                                      {workout.name}
+                                                    </Label>
+                                                  </div>
+                                                </div>
+                                              </FormControl>
+                                            </FormItem>
+                                          ))}
+                                        </RadioGroup>
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                                {/* <Accordion type="single" className="w-full" collapsible>
                         <RadioGroup defaultValue="option-one" className="">
                           <AccordionItem value="item-1">
                             <AccordionTrigger>week 1</AccordionTrigger>
@@ -215,21 +285,24 @@ export default function StartWorkoutModal({
                           </AccordionItem>
                         </RadioGroup>
                       </Accordion> */}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                    <CardFooter className="fixed bottom-4 right-2">
-                      <Button
-                        type="submit"
-                        variant={"default"}
-                        className="ml-auto"
-                      >
-                        go time
-                      </Button>
-                    </CardFooter>
-                  </form>
-                </Form>
-              </Card>
+                              </div>
+                            </ScrollArea>
+                          </CardContent>
+                          <CardFooter className="fixed bottom-4 right-2">
+                            <Button
+                              type="submit"
+                              variant={"default"}
+                              className="ml-auto"
+                            >
+                              go time
+                            </Button>
+                          </CardFooter>
+                        </form>
+                      </Form>
+                    </>
+                  )}
+                </Card>
+              </>
             </PopoverContent>
           </Popover>
         </div>

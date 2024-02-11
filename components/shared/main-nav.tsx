@@ -37,7 +37,7 @@ let counter = 0;
 
 export default async function MainNav({ children }: any) {
   const workoutData = await fetchUserWorkoutData();
-  console.dir(workoutData, { depth: null });
+  // console.dir(workoutData, { depth: null });
   counter++;
   console.log(counter);
   return (

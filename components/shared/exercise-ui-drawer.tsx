@@ -18,13 +18,18 @@ import {
   CrossCircledIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
+import { ScrollArea } from "../ui/scroll-area";
+import { DrawerTrigger } from "../ui/drawer";
+import { toast } from "../ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const workoutSchema = yup.object({
+  workoutId: yup.number(),
   workoutName: yup.string(),
-  exercise: yup.array(
+  exercise_templates: yup.array(
     yup.object({
-      exerciseName: yup.string(),
-      sets: yup
+      exercise_name: yup.string(),
+      set_data: yup
         .array(
           yup.object({
             previous_weight: yup.number(),
@@ -47,9 +52,15 @@ interface SetField {
 const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: `exercise.${exerciseIndex}.sets`,
+    name: `exercise_templates.${exerciseIndex}.set_data`,
   });
 
+  const { watch } = form;
+  const watchAllFields = watch();
+  // React.useEffect(() => {
+  //   localStorage.setItem("form_state", JSON.stringify(form.getValues()));
+  //   console.log(localStorage.getItem("form_state"));
+  // }, [form, watchAllFields]);
   return (
     <>
       <div className="grid grid-cols-6 gap-2 -ml-1">
@@ -82,9 +93,13 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
                 <FormControl>
                   <FormField
                     control={form.control}
-                    name={`exercise.${exerciseIndex}.sets[${fieldIndex}].previous_weight`}
+                    name={`exercise_templates.${exerciseIndex}.set_data[${fieldIndex}].previous_weight`}
                     render={(field) => (
-                      <Input inputMode="numeric" placeholder="" {...field.field} />
+                      <Input
+                        inputMode="numeric"
+                        placeholder=""
+                        {...field.field}
+                      />
                     )}
                   />
                 </FormControl>
@@ -93,9 +108,13 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
                 <FormControl>
                   <FormField
                     control={form.control}
-                    name={`exercise.${exerciseIndex}.sets[${fieldIndex}].current_weight`}
+                    name={`exercise_templates.${exerciseIndex}.set_data[${fieldIndex}].current_weight`}
                     render={(field) => (
-                      <Input inputMode="numeric" placeholder="" {...field.field} />
+                      <Input
+                        inputMode="numeric"
+                        placeholder=""
+                        {...field.field}
+                      />
                     )}
                   />
                 </FormControl>
@@ -104,7 +123,7 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
                 <FormControl>
                   <FormField
                     control={form.control}
-                    name={`exercise.${exerciseIndex}.sets[${fieldIndex}].unit`}
+                    name={`exercise_templates.${exerciseIndex}.set_data[${fieldIndex}].unit`}
                     render={(field) => (
                       <Input placeholder="" {...field.field} />
                     )}
@@ -115,9 +134,13 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
                 <FormControl>
                   <FormField
                     control={form.control}
-                    name={`exercise.${exerciseIndex}.sets[${fieldIndex}].reps`}
+                    name={`exercise_templates.${exerciseIndex}.set_data[${fieldIndex}].reps`}
                     render={(field) => (
-                      <Input inputMode="numeric" placeholder="" {...field.field} />
+                      <Input
+                        inputMode="numeric"
+                        placeholder=""
+                        {...field.field}
+                      />
                     )}
                   />
                 </FormControl>
@@ -141,10 +164,14 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
         className="w-1/3 mt-2 self-center bg-slate-200"
         onClick={() =>
           append({
-            previous_weight: undefined,
-            current_weight: undefined,
-            unit: form.getValues().exercise[exerciseIndex]?.sets[0]?.unit ?? undefined,
-            reps: form.getValues().exercise[exerciseIndex]?.sets[0]?.reps ?? undefined,
+            previous_weight: "",
+            current_weight: "",
+            unit:
+              form.getValues().exercise_templates[exerciseIndex]?.set_data[0]
+                ?.unit ?? "",
+            reps:
+              form.getValues().exercise_templates[exerciseIndex]?.set_data[0]
+                ?.reps ?? "",
           })
         }
       >
@@ -154,80 +181,85 @@ const Sets = ({ form, exerciseIndex }: { form: any; exerciseIndex: any }) => {
   );
 };
 
-export default function StartWorkoutForm({workout}:{workout: any}) {
+interface WorkoutData {
+  workoutName: string;
+}
+
+export default function StartWorkoutForm({ workout }: { workout: any }) {
+  const router = useRouter()
+  const [cachedFormData, setCachedFormData] = React.useState("");
+
   const form = useForm({
     mode: "onChange",
     defaultValues: {
-      workoutName: "",
-      exercise: [
-        {
-          exerciseName: "",
-          sets: [
-            {
-              previous_weight: "",
-              current_weight: "",
-              unit: "",
-              reps: "",
-            },
-          ],
-        },
-      ],
+      workoutId:
+        JSON.parse(localStorage.getItem("form_state") ?? "{}").workoutId ??
+        workout.id,
+      workoutName:
+        JSON.parse(localStorage.getItem("form_state") ?? "{}").workoutName ??
+        workout.name,
+      exercise_templates:
+        JSON.parse(localStorage.getItem("form_state") ?? "{}")
+          .exercise_templates ?? workout.exercise_templates,
     },
   });
+
+  const { watch } = form;
+
+  const watchAllFields = watch();
 
   const onSubmit = async (values: any) => {
     console.log(values);
     try {
-      const response = await fetch("/api/workouts/create", {
+      const response = await fetch("/api/workout-log/create", {
         body: JSON.stringify(values),
-        method: "POST"
-      })
-      const data = await response.json();
-      console.log(data)
+        method: "POST",
+      });
+      if (response.ok) {
+        toast({
+          title: "success",
+          description: "workout logged",
+        });
+        router.refresh();
+        localStorage.removeItem('form_state')
+      }
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
   };
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "exercise",
+    name: "exercise_templates",
   });
 
+  React.useEffect(() => {
+    localStorage.setItem("form_state", JSON.stringify(form.getValues()));
+    console.log(JSON.parse(localStorage.getItem("form_state") ?? ""));
+  }, [form, watchAllFields]);
+
+  const clearWorkout = () => {
+    // setTimeout(() => {
+    localStorage.removeItem("form_state");
+    // }, 300);
+  };
   return (
     <div className="flex flex-col">
+      <></>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-3 p-2">
-            <div className="mb-1">
-              <FormField
-                control={form.control}
-                name="workoutName"
-                render={(field) => (
-                  <FormItem>
-                    <FormControl>
-                      {/* <Input placeholder="Enter workout name" {...field.field} /> */}
-                      <input
-                        className="flex h-9 w-11/12 rounded-md border-input bg-transparent px-1 py-1 text-xl font-bold tracking-tight transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        placeholder="workout title ?"
-                        {...field.field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-
             {fields.map((fieldAItem: any, exerciseIndex: number) => (
               <div className="flex flex-col gap-2" key={exerciseIndex}>
                 <FormField
                   control={form.control}
-                  name={`exercise.${exerciseIndex}.exerciseName`}
+                  name={`exercise_templates.${exerciseIndex}.exercise_name`}
                   render={(field) => (
                     <div>
                       <FormItem>
                         <FormControl>
                           <input
+                            disabled={true}
                             className="flex mb-2 h-9 w-2/3 rounded-md border-input bg-transparent px-1 py-1 text-lg font-semibold tracking-tight transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                             placeholder="exercise name ?"
                             {...field.field}
@@ -238,32 +270,24 @@ export default function StartWorkoutForm({workout}:{workout: any}) {
                   )}
                 />
                 <Sets form={form} exerciseIndex={exerciseIndex} />
-                
               </div>
             ))}
-            <Button
+            <div className="flex w-full mt-10 items-center justify-end gap-2">
+              <DrawerTrigger asChild>
+                <Button
                   type="button"
-                  variant={"secondary"}
-                  className="w-3/5  self-center mt-2 bg-stone-200"
-                  onClick={() =>
-                    append({
-                      exerciseName: "",
-                      sets: [
-                        {
-                          previous_weight: "",
-                          current_weight: "",
-                          unit: "",
-                          reps: "",
-                        },
-                      ],
-                    })
-                  }
+                  className="bg-rose-500"
+                  onClick={() => clearWorkout()}
                 >
-                  add exercise
+                  cancel workout
                 </Button>
-            <Button className="self-end bg-slate-700" type="submit">
-              finish workout
-            </Button>
+              </DrawerTrigger>
+              <DrawerTrigger asChild>
+                <Button className="bg-slate-700" type="submit">
+                  finish workout
+                </Button>
+              </DrawerTrigger>
+            </div>
           </div>
         </form>
       </Form>

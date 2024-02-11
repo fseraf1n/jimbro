@@ -12,6 +12,7 @@ interface Sets {
 }
 interface Exercise {
   exerciseName: string;
+  exerciseId: string;
   sets: Sets[];
 }
 interface Workout {
@@ -23,6 +24,8 @@ interface Workout {
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as Workout;
   console.dir(body, { depth: null });
+
+  console;
   const cookieStore = cookies();
   const supabaseAuth = createServerComponentClient({
     cookies: () => cookieStore,
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
   const createWorkout = async () => {
     try {
       const { data, error } = await supabase
-        .from("workout")
+        .from("workout_templates")
         .insert([{ name: body.workoutName, user_id: user?.id }])
         .select();
 
@@ -50,43 +53,26 @@ export async function POST(request: NextRequest) {
 
   const createExercise = async (workoutId: number) => {
     try {
-      body.exercise.forEach(async (item) => {
+      const newBody = body.exercise.map((exercise: any, index) => ({
+        ...exercise,
+        order: index + 1,
+      }));
+      newBody.forEach(async (item) => {
         const { data, error } = await supabase
-          .from("exercise")
-          .insert([{ name: item.exerciseName, workout_id: workoutId }])
+          .from("exercise_templates")
+          .insert([
+            {
+              exercise_id: item.exerciseId,
+              exercise_name: item.exerciseName,
+              workout_template_id: workoutId,
+              set_data: item.sets,
+              order: item.order
+            },
+          ])
           .select();
-
-        if (data) {
-          const exerciseId = data[0].id;
-          createSets(exerciseId, item.sets);
-        }
       });
     } catch (e) {
       console.log("exercise create error: ", e);
-      return NextResponse.json({ error: e, status: 500 });
-    }
-  };
-
-  const createSets = async (exerciseId: number, setData: Sets[]) => {
-    console.dir(setData, { depth: null });
-    try {
-      const { data, error } = await supabase
-        .from("set")
-        .insert(
-          setData.map((set) => ({
-            previous_weight:
-              set.previous_weight === "" ? null : set.previous_weight,
-            current_weight:
-              set.current_weight === "" ? null : set.current_weight,
-            unit: set.unit,
-            reps: set.reps === "" ? null : set.reps,
-            exercise_id: exerciseId,
-          }))
-        )
-        .select();
-      console.log("create sets response: ", error);
-    } catch (e) {
-      console.log("set create error: ", e);
       return NextResponse.json({ error: e, status: 500 });
     }
   };

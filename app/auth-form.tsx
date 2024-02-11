@@ -32,7 +32,7 @@ export default function AuthForm() {
       theme="default"
       showLinks={false}
       providers={[]}
-      redirectTo='http://192.168.1.140:3000/auth/callback'
+      redirectTo='http://localhost:3000/auth/callback'
     //   redirectTo={`${process.env.NEXT_PUBLIC_HOST}/auth/callback`}
     />
   )

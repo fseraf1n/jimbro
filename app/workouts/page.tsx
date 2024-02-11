@@ -13,7 +13,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import React from "react";
+import React, { useState } from "react";
 import CreateWorkoutForm from "./create-workout-form";
 import WorkoutDisplay from "./workout-display";
 import {
@@ -47,15 +47,22 @@ import { getCurrentUserData } from "../util-functions";
 const fetchWorkoutData = async () => {
   const user = await getCurrentUserData();
   let { data: workout, error } = await supabase
-    .from("workout")
-    .select(`id, name, exercise(id, name, set(*))`)
+    .from("workout_templates")
+    .select(`id, name, exercise_templates(id, exercise_name, set_data)`)
     .eq("user_id", user?.id);
   // console.dir(workout, { depth: null });
   return workout;
 };
 
+const fetchExerciseCatalog = async () => {
+  let { data: exercises, error } = await supabase
+    .from("exercise_data")
+    .select("id, name");
+  return exercises;
+};
 export default async function WorkoutsPage() {
   const workoutData = await fetchWorkoutData();
+  const exerciseCatalog = await fetchExerciseCatalog();
   return (
     <div>
       <h2 className="p-3 tracking-tight"> my workouts</h2>
@@ -132,11 +139,11 @@ export default async function WorkoutsPage() {
 
               <DrawerContent className=" w-full h-[650px] rounded-md">
                 <ScrollArea className="">
-                  <CreateWorkoutForm />
+                  <CreateWorkoutForm exerciseCatalog={exerciseCatalog}/>
                 </ScrollArea>
               </DrawerContent>
             </Drawer>
-            <WorkoutDisplay data={workoutData as Workout[]} />
+            <WorkoutDisplay data={workoutData ?? []} />
           </TabsContent>
         </Tabs>
       </div>

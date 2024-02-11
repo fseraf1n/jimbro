@@ -8,11 +8,11 @@ export interface Sets {
 }
 export interface Exercise {
   id: number;
-  name: string;
-  set: Sets[];
+  exercise_name: string;
+  set_data: Sets[];
 }
 export interface Workout {
   name: string;
   id: number;
-  exercise: Exercise[];
+  exercise_templates: Exercise[];
 }
