@@ -6,6 +6,11 @@ import MainNav from "@/components/shared/main-nav";
 import { supabase } from "@/lib/initSupabase";
 import { Toaster } from "@/components/ui/toaster";
 
+export const fontSans = FontSans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -13,7 +18,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          fontSans.variable
+        )}>
         {children}
         <Toaster />
       </body>
