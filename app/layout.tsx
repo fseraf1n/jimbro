@@ -6,7 +6,7 @@ import MainNav from "@/components/shared/main-nav";
 import { supabase } from "@/lib/initSupabase";
 import { Toaster } from "@/components/ui/toaster";
 
-export const fontSans = FontSans({
+const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 })
