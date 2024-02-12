@@ -31,3 +31,10 @@ export const fetchUserWorkoutData = async () => {
     }
   }
 };
+
+export const fetchExerciseCatalog = async () => {
+  let { data: exercises, error } = await supabase
+    .from("exercise_data")
+    .select("id, name");
+  return exercises;
+};

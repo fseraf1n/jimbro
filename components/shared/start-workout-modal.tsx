@@ -55,7 +55,7 @@ export default function StartWorkoutModal({
 }: {
   workoutData: any;
 }) {
-  // console.dir(workoutData, {depth: null})
+  console.dir(workoutData, {depth: null})
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutData>(

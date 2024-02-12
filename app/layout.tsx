@@ -11,6 +11,11 @@ const fontSans = FontSans({
   variable: "--font-sans",
 })
 
+// export const fontSans = FontSans({
+//   subsets: ["latin"],
+//   variable: "--font-sans",
+// })
+
 export default function RootLayout({
   children,
 }: Readonly<{

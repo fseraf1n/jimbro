@@ -31,15 +31,17 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import StartWorkoutModal from "./start-workout-modal";
-import { fetchUserWorkoutData, getCurrentUserData } from "@/app/util-functions";
+import { fetchExerciseCatalog, fetchUserWorkoutData, getCurrentUserData } from "@/app/util-functions";
+import CreateWorkoutModal from "./create-workout-modal";
 
 let counter = 0;
 
 export default async function MainNav({ children }: any) {
   const workoutData = await fetchUserWorkoutData();
+  const exerciseCatalog = await fetchExerciseCatalog();
+
   // console.dir(workoutData, { depth: null });
-  counter++;
-  console.log(counter);
+
   return (
     <div>
       {children}
@@ -85,7 +87,15 @@ export default async function MainNav({ children }: any) {
           </Link>
 
           <div className="self-center">
-            <StartWorkoutModal workoutData={workoutData} />
+            {workoutData?.length == 0 ? (
+              <>
+                <CreateWorkoutModal exerciseCatalog={exerciseCatalog}/>
+              </>
+            ) : (
+              <>
+                <StartWorkoutModal workoutData={workoutData} />
+              </>
+            )}
           </div>
 
           <Link
